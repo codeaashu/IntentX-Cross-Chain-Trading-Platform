@@ -1,0 +1,39 @@
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, sqlx::Type)]
+#[sqlx(type_name = "execution_status", rename_all = "lowercase")]
+pub enum ExecutionStatus {
+    Pending,
+    Executing,
+    Completed,
+    Failed,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+pub struct Execution {
+    pub id: Uuid,
+    pub intent_id: Uuid,
+    pub solver_id: String,
+    pub tx_hash: String,
+    pub status: ExecutionStatus,
+    pub created_at: DateTime<Utc>,
+}
+
+impl Execution {
+    pub fn new(
+        intent_id: Uuid,
+        solver_id: String,
+        tx_hash: String,
+    ) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            intent_id,
+            solver_id,
+            tx_hash,
+            status: ExecutionStatus::Pending,
+            created_at: Utc::now(),
+        }
+    }
+}
